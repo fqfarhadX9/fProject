@@ -1,6 +1,7 @@
 const {Router} = require("express");
-const registerUser = require("../controllers/user.js");
+const {registerUser, logInUser, logOutUser} = require("../controllers/user.js");
 const upload = require("../middlewares/multer.js")
+const verifyJwt = require("../middlewares/authorization.js")
 
 const router = Router();
 
@@ -17,5 +18,9 @@ router.route("/register").post(
     ]),
     registerUser
     );
+
+router.route("/login").post(logInUser)
+
+router.route("/logout").post(verifyJwt, logOutUser)
 
 module.exports = router
