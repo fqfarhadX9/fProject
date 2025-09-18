@@ -1,8 +1,7 @@
-const { replaceOne } = require("../models/user");
 const ApiError = require("../utils/apiError");
 const asyncHandler = require("../utils/asyncHandler");
 const User = require("../models/user.js")
-import jwt from "jsonwebtoken"
+const jwt = require("jsonwebtoken")
 
 const verifyJWT = asyncHandler(async (req, _, next) => {
      try {
