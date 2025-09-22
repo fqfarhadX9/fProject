@@ -5,6 +5,7 @@ const uploadOnCloudinary = require("../utils/cloudinary.js")
 const ApiResponse = require("../utils/apiResponse.js")
 const jwt = require("jsonwebtoken")
 const Subscription = require("../models/subscription.js")
+const { default: mongoose } = require("mongoose")
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -398,6 +399,64 @@ const getUserChanelProfile = asyncHandler( async (req, res) => {
     )
 })
 
+const getWatchHistory = asyncHandler( async (req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        username: 1,
+                                        fulName: 1,
+                                        avtar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+])
+    
+    if (!user.length) {
+     return res
+     .status(404)
+     .json(new ApiError(404, [], "User not found"))
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200, user[0].watchHistory, "watch history fetched successfully"
+        )
+    )
+})
+
 module.exports = {
     registerUser,
     logInUser,
@@ -409,4 +468,5 @@ module.exports = {
     updateUserAvtar,
     updateUserCoverImage,
     getUserChanelProfile,
+    getWatchHistory
 }
