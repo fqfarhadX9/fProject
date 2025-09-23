@@ -1,4 +1,5 @@
-const {Schema} = require("mongoose")
+const mongoose = require("mongoose")
+const {Schema} = mongoose;
 const aggregatepaginate = require("mongoose-aggregate-paginate-v2")
 
 const commentSchema = new Schema({

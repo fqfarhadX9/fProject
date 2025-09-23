@@ -136,8 +136,8 @@ const logOutUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
 
         },
@@ -353,7 +353,7 @@ const getUserChanelProfile = asyncHandler( async (req, res) => {
                 from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
-                as: "subsribedTo"
+                as: "subscribedTo"
             }
         },
         {
