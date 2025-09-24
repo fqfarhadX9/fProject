@@ -1,6 +1,6 @@
-import mongoose from "mongoose"
-import ApiResponse from "../utils/apiResponse.js"
-
+const mongoose = require("mongoose")
+const ApiResponse = require("../utils/ApiResponse.js")
+const ApiError = require("../utils/ApiResponse.js")
 const asyncHandler = require("../utils/asyncHandler.js")
 const Like = require("../models/like.model.js")
 
@@ -8,7 +8,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params
     //TODO: toggle like on video
     if(!videoId) {
-        throw new ApiResponse(400, "Invalid video id")
+        throw new ApiError(400, "Invalid video id")
     }
 
     const existingLike = await Like.findOne(
@@ -54,7 +54,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
     //TODO: toggle like on comment
     if(!commentId) {
-        throw new ApiResponse(400, "Invalid comment id")
+        throw new ApiError(400, "Invalid comment id")
     }
 
     const existingLike = await Like.findOne(
@@ -101,7 +101,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     const {tweetId} = req.params
     //TODO: toggle like on tweet
     if(!tweetId) {
-        throw new ApiResponse(400, "Invalid tweet id")
+        throw new ApiError(400, "Invalid tweet id")
     }
 
     const existingLike = await Like.findOne(
@@ -186,7 +186,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     )   
 })
 
-export {
+module.exports = {
     toggleCommentLike,
     toggleTweetLike,
     toggleVideoLike,
