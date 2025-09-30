@@ -77,6 +77,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         title,
         description,
         videoFile: uploadedVideo.url,
+        thumbnail: uploadedVideo.thumbnail,
         owner: req.user._id,
         isPublished: true
     })
@@ -112,16 +113,88 @@ const getVideoById = asyncHandler(async (req, res) => {
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: update video details like title, description, thumbnail
+    const { title, description, thumbnail } = req.body
+
+    if(!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    if(!title && !description && !thumbnail) {
+        throw new ApiError(400, "At least one field (title, description, thumbnail) is required to update")
+    }
+    
+    // Only include provided fields
+    const updateFields = {}
+    if(title) updateFields.title = title
+    if(description) updateFields.description = description
+    if(thumbnail) updateFields.thumbnail = thumbnail
+
+    const video = await Video.findOneAndUpdate(
+        { _id: videoId, owner: req.user._id },
+        { $set: updateFields},
+        { new: true, runValidators: true },
+    )
+
+    if(!video) {
+        throw new ApiError(404, "Video not found or you are not the owner")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, video, "Video updated successfully")
+    )
 
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    if(!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    const video = await Video.findOneAndDelete(
+        { _id: videoId, owner: req.user._id }
+    )
+
+    if(!video) {
+        throw new ApiError(404, "Video not found or you are not the owner")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {_id: video._id}, "Video deleted successfully")
+    )
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
+    if(!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    const video = await Video.findOne(
+        {
+            _id: videoId,
+            owner: req.user._id
+        }
+    )
+
+    if(!video) {
+        throw new ApiError(404, "Video not found or you are not the owner")
+    }
+
+    video.isPublished = !video.isPublished
+    await video.save()
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, video, `Video ${video.isPublished ? "published" : "unpublished"} successfully`)
+    )
 })
 
 export {
