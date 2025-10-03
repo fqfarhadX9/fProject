@@ -104,16 +104,16 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
 const getPlaylistById = asyncHandler(async (req, res) => {
     //TODO: get playlist by id
-    const {id} = req.params;
+    const {playlistId} = req.params;
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
+    if(!mongoose.Types.ObjectId.isValid(playlistId)){
         throw new ApiError(400, "Invalid playlist ID")
     }
 
     const playlist = await Playlist.aggregate(
         [
             {
-                $match: {_id: new mongoose.Types.ObjectId(id)}
+                $match: {_id: new mongoose.Types.ObjectId(playlistId)}
             },
             {
                 $lookup: {
@@ -252,14 +252,14 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
 const deletePlaylist = asyncHandler(async (req, res) => {
     // TODO: delete playlist
-    const {id} = req.params;
+    const {playlistId} = req.params;
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
+    if(!mongoose.Types.ObjectId.isValid(playlistId)){
         throw new ApiError(400, "Invalid playlist ID")
     }
 
     const playlist = await Playlist.findOneAndDelete({
-        _id: id,
+        _id: playlistId,
         owner: req.user?._id
     })
 
@@ -281,10 +281,10 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 
 const updatePlaylist = asyncHandler(async (req, res) => {
     //TODO: update playlist
-    const {id} = req.params;
+    const {playlistId} = req.params;
     const {name, description} = req.body;
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
+    if(!mongoose.Types.ObjectId.isValid(playlistId)){
         throw new ApiError(400, "Invalid playlist ID")
     }
 
@@ -294,7 +294,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
 
     const updatedPlaylist = await Playlist.findOneAndUpdate(
         {
-            _id: id,
+            _id: playlistId,
             owner: req.user?._id
         },
         {
